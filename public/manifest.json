@@ -1,7 +1,7 @@
 {
   "author": "jin",
-  "name": "RMContentList",
-  "description": "help user to orginize knowledge",
+  "name": "Auto Tag",
+  "description": "Automatically tag related content based on timestamps",
   "enableOnMobile": false,
   "id": "jin-9i5rvag",
   "manifestVersion": 1,
@@ -9,7 +9,7 @@
   "version": {
     "major": 0,
     "minor": 0,
-    "patch": 1
+    "patch": 3
   },
   "requestNative": false,
   "requiredScopes": [

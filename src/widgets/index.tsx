@@ -71,7 +71,7 @@ async function onActivate(plugin: ReactRNPlugin) {
   await plugin.app.registerWidget('content_sign_widget', WidgetLocation.LeftSidebar, {
     dimensions: { height: 'auto', width: '100%' },
     widgetTabIcon: 'https://cdn-icons-png.flaticon.com/512/3406/3406894.png',
-    widgetTabTitle: '目录结构排序'
+    widgetTabTitle: 'Auto Tag'
   });
 
   // 定期检查标签状态，确保移除标签后不再添加
