@@ -23,6 +23,12 @@ function ContentSignWidget() {
     }
   }, [enabled]);
 
+  // 获取当前活动标签数量
+  const activeTagsCount = useTracker(async () => {
+    const infos = await plugin.storage.getSynced('content_sign_infos') as ContentSignInfo[] || [];
+    return infos.length;
+  }, []);
+
   // 切换开关状态
   const handleToggle = async () => {
     const newState = !isEnabled;
@@ -30,28 +36,22 @@ function ContentSignWidget() {
     await plugin.storage.setSynced('content_sign_enabled', newState);
   };
 
-  // 获取当前活动标签数量
-  const activeTagsCount = useTracker(async () => {
-    const infos = await plugin.storage.getSynced('content_sign_infos') as ContentSignInfo[] || [];
-    return infos.length;
-  }, []);
-
   return (
-    <div className="p-4 flex flex-col gap-3 bg-white dark:bg-gray-800 rounded-lg shadow">
-      <div className="font-bold text-lg text-gray-800 dark:text-white">目录知识结构排序</div>
+    <div className="p-4 flex flex-col gap-3">
+      <div className="font-bold text-lg">目录知识结构排序</div>
       
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">自动标记功能</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-sm font-medium">自动标记功能</span>
+          <span className="text-xs text-gray-500">
             {isEnabled ? '已启用' : '已禁用'}
           </span>
         </div>
         
         <button 
           onClick={handleToggle} 
-          className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-            isEnabled ? 'bg-blue-600' : 'bg-gray-300'
+          className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ease-in-out duration-200 focus:outline-none ${
+            isEnabled ? 'bg-green-500' : 'bg-gray-200'
           }`}
           aria-label={isEnabled ? '禁用自动标记功能' : '启用自动标记功能'}
           tabIndex={0}
@@ -69,7 +69,7 @@ function ContentSignWidget() {
         </button>
       </div>
       
-      <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+      <div className="text-xs text-gray-500 mt-2 pt-2">
         <p>当启用时，新创建的Rem将自动被标记。</p>
         <p>当前共有 <span className="font-bold">{activeTagsCount || 0}</span> 个活动标签。</p>
       </div>
