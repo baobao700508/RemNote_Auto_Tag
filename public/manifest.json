@@ -1,22 +1,21 @@
 {
+  "author": "jin",
+  "name": "RMContentList",
+  "description": "help user to orginize knowledge",
+  "enableOnMobile": false,
+  "id": "jin-9i5rvag",
   "manifestVersion": 1,
-  "id": "plugin_template",
-  "name": "Plugin Template",
-  "author": "remnote",
-  "repoUrl": "",
+  "repoUrl": "https://github.com/yourusername/remnote-directory-structure-plugin",
   "version": {
     "major": 0,
     "minor": 0,
     "patch": 1
   },
-  "theme": [],
-  "enableOnMobile": false,
-  "description": "",
   "requestNative": false,
   "requiredScopes": [
     {
       "type": "All",
-      "level": "Read"
+      "level": "ReadCreateModifyDelete"
     }
   ]
 }
