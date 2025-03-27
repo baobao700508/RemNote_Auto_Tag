@@ -42,11 +42,14 @@ function ContentSignWidget() {
         try {
           const rem = await plugin.rem.findOne(infos[i].taggedRemId);
           if (rem) {
-            // 简单地获取Rem的ID作为文本显示
-            const text = `标记的Rem #${i+1}`;
+            // 获取Rem的实际文本内容
+            let remText = "";
+            if (rem.text) {
+              remText = await plugin.richText.toString(rem.text);
+            }
             remsData.push({
               id: infos[i].taggedRemId,
-              text: text
+              text: remText || `标记的Rem #${i+1}`
             });
           }
         } catch (e) {
@@ -157,6 +160,7 @@ function ContentSignWidget() {
               handleButtonClick(rem.id);
             }
           }}
+          title={rem ? rem.text : '空槽位'}
         >
           {rem ? rem.text : '空槽位'}
         </button>
