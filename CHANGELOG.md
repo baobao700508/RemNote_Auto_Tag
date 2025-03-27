@@ -4,8 +4,8 @@
 所有重要的版本更新都将记录在此文件中。
 All significant version updates will be recorded in this file.
 
-## [0.0.6] - 2024-03-27
-## [0.0.6] - 2024-03-27
+## [0.0.6] - 2025-03-26
+## [0.0.6] - 2025-03-26
 
 ### 新增
 ### Added
@@ -43,8 +43,8 @@ All significant version updates will be recorded in this file.
 - 修复了样式在深色模式下的显示问题
 - Fixed styling issues in dark mode
 
-## [0.0.5] - 2024-03-20
-## [0.0.5] - 2024-03-20
+## [0.0.5] - 2025-03-26
+## [0.0.5] - 2025-03-26
 
 ### 新增
 ### Added
@@ -79,8 +79,8 @@ All significant version updates will be recorded in this file.
 - 解决了某些情况下自动标记失效的问题
 - Resolved issue where automatic tagging would fail under certain conditions
 
-## [0.0.4] - 2024-03-15
-## [0.0.4] - 2024-03-15
+## [0.0.4] - 2025-03-26
+## [0.0.4] - 2025-03-26
 
 ### 新增
 ### Added
@@ -109,8 +109,8 @@ All significant version updates will be recorded in this file.
 - 修复了与其他插件的兼容性问题
 - Fixed compatibility issues with other plugins
 
-## [0.0.3] - 2024-03-10
-## [0.0.3] - 2024-03-10
+## [0.0.3] - 2025-03-26
+## [0.0.3] - 2025-03-26
 
 ### 新增
 ### Added
@@ -130,8 +130,8 @@ All significant version updates will be recorded in this file.
 - 改进了标签添加的可靠性
 - Improved reliability of tag addition
 
-## [0.0.2] - 2024-03-05
-## [0.0.2] - 2024-03-05
+## [0.0.2] - 2025-03-26
+## [0.0.2] - 2025-03-26
 
 ### 新增
 ### Added
@@ -151,8 +151,8 @@ All significant version updates will be recorded in this file.
 - 优化了标签添加逻辑
 - Optimized tag addition logic
 
-## [0.0.1] - 2024-03-01
-## [0.0.1] - 2024-03-01
+## [0.0.1] - 2025-03-26
+## [0.0.1] - 2025-03-26
 
 ### 新增
 ### Added
