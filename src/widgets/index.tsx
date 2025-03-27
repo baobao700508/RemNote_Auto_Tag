@@ -48,10 +48,29 @@ async function onActivate(plugin: ReactRNPlugin) {
             timestamp: Date.now()
           });
           
-          // If more than 5, delete the earliest
+          // If more than 5, delete the earliest and remove the tag from that Rem
           if (contentSignInfos.length > 5) {
             contentSignInfos.sort((a, b) => a.timestamp - b.timestamp);
-            contentSignInfos.shift(); // Remove the first (earliest)
+            
+            // Get the oldest (first) record that we'll remove
+            const oldestRecord = contentSignInfos.shift(); // Remove the first (earliest)
+            
+            // Also remove the tag from that Rem physically
+            if (oldestRecord) {
+              try {
+                const oldestTaggedRem = await plugin.rem.findOne(oldestRecord.taggedRemId);
+                if (oldestTaggedRem && powerup) {
+                  // Remove the Content Structure Sign tag from this Rem
+                  await oldestTaggedRem.removeTag(powerup._id);
+                  console.log(`Removed Content Structure Sign tag from Rem ${oldestRecord.taggedRemId}`);
+                  
+                  // Show notification to user
+                  await plugin.app.toast('Oldest Content Structure Sign tag removed automatically');
+                }
+              } catch (removeError) {
+                console.error('Error removing tag from oldest Rem:', removeError);
+              }
+            }
           }
           
           // Save updated information
