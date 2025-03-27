@@ -100,14 +100,11 @@ When using for the first time, RemNote may request confirmation of the plugin's 
 - 解决方法：
 - Solution:
 
-  1. 确认您有访问被标记Rem的权限
-  1. Confirm you have permission to access the tagged Rem
+  1. 检查Rem是否仍然存在（未被删除）
+  1. Check if the Rem still exists (has not been deleted)
 
-  2. 检查Rem是否仍然存在（未被删除）
-  2. Check if the Rem still exists (has not been deleted)
-
-  3. 尝试刷新应用后再次尝试
-  3. Try refreshing the application and try again
+  2. 尝试刷新应用后再次尝试
+  2. Try refreshing the application and try again
 
 ## 卸载方法
 ## Uninstallation Method

@@ -3,7 +3,7 @@ var glob = require('glob');
 var path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const { EsbuildPlugin } = require('esbuild-loader');
 const { ProvidePlugin, BannerPlugin } = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
@@ -99,7 +99,9 @@ const config = {
 if (isProd) {
   config.optimization = {
     minimize: isProd,
-    minimizer: [new ESBuildMinifyPlugin()],
+    minimizer: [new EsbuildPlugin({
+      target: 'es2020'
+    })],
   };
 } else {
   // for more information, see https://webpack.js.org/configuration/dev-server
