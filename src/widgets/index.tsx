@@ -7,28 +7,28 @@ import {
 import '../style.css';
 import '../App.css';
 
-// 存储content_sign标签及其时间的接口
+// Interface for storing content_sign tag and its timestamp
 interface ContentSignInfo {
   taggedRemId: string;
   timestamp: number;
 }
 
-// 用于存储定时器ID
+// For storing timer ID
 let checkTagsStatusInterval: ReturnType<typeof setInterval> | null = null;
 
 async function onActivate(plugin: ReactRNPlugin) {
-  // 初始化插件设置
+  // Initialize plugin settings
   await plugin.storage.setSynced('content_sign_enabled', true);
   
-  // 注册content_sign的powerup（使用新版API，使用对象参数）
+  // Register content_sign powerup (using new API with object parameters)
   await plugin.app.registerPowerup({
     name: 'Content Structure Sign',
     code: 'content_structure_sign',
-    description: '用于标记内容结构的powerup标签',
+    description: 'Powerup tag for marking content structure',
     options: { slots: [] }
   });
 
-  // 注册一个斜杠命令，用于添加content_sign标签
+  // Register a slash command to add content_sign tag
   await plugin.app.registerCommand({
     id: 'add-content-structure-sign',
     name: 'Add Content Structure Sign',
@@ -39,79 +39,82 @@ async function onActivate(plugin: ReactRNPlugin) {
         if (powerup) {
           await focusedRem.addTag(powerup._id);
 
-          // 记录标记的时间和rem
+          // Record the time and rem of tagging
           let contentSignInfos: ContentSignInfo[] = await plugin.storage.getSynced('content_sign_infos') || [];
           
-          // 添加新记录
+          // Add new record
           contentSignInfos.push({
             taggedRemId: focusedRem._id,
             timestamp: Date.now()
           });
           
-          // 如果超过5个，删除最早的
+          // If more than 5, delete the earliest
           if (contentSignInfos.length > 5) {
             contentSignInfos.sort((a, b) => a.timestamp - b.timestamp);
-            contentSignInfos.shift(); // 移除第一个（最早的）
+            contentSignInfos.shift(); // Remove the first (earliest)
           }
           
-          // 保存更新后的信息
+          // Save updated information
           await plugin.storage.setSynced('content_sign_infos', contentSignInfos);
           
-          await plugin.app.toast('已添加Content Structure Sign标签');
+          await plugin.app.toast('Content Structure Sign tag added');
         } else {
-          await plugin.app.toast('无法找到Content Structure Sign标签，请检查插件是否正确加载');
+          await plugin.app.toast('Cannot find Content Structure Sign tag, please check if the plugin is loaded correctly');
         }
       } else {
-        await plugin.app.toast('请先选择一个Rem');
+        await plugin.app.toast('Please select a Rem first');
       }
     },
   });
 
-  // 在左侧边栏底部注册小组件
+  // Register widget in bottom left sidebar
   await plugin.app.registerWidget('content_sign_widget', WidgetLocation.LeftSidebar, {
     dimensions: { height: 'auto', width: '100%' },
     widgetTabIcon: 'https://cdn-icons-png.flaticon.com/512/3406/3406894.png',
-    widgetTabTitle: 'Auto Tag'
+    widgetTabTitle: 'AUTO TAG'
   });
 
-  // 定期检查标签状态，确保移除标签后不再添加
+  // Periodically check tag status to ensure no more added after tag removal
   const checkTagsStatus = async () => {
     try {
-      // 获取当前存储的content_sign信息
+      // Get currently stored content_sign information
       let contentSignInfos: ContentSignInfo[] = await plugin.storage.getSynced('content_sign_infos') || [];
       if (contentSignInfos.length === 0) return;
       
-      // 获取powerup
+      // Get powerup
       const powerup = await plugin.powerup.getPowerupByCode('content_structure_sign');
       if (!powerup) return;
       
-      // 获取所有带有该标签的Rem
+      // Get all Rems with that tag
       const taggedRems = await powerup.taggedRem();
       const taggedRemIds = taggedRems.map(rem => rem._id);
       
-      // 过滤掉已经不存在标签的rem
+      // Filter out rems that no longer have tags
       const updatedContentSignInfos = contentSignInfos.filter(info => 
         taggedRemIds.includes(info.taggedRemId)
       );
       
-      // 如果有变化，更新存储
+      // If there are changes, update storage
       if (updatedContentSignInfos.length !== contentSignInfos.length) {
-        console.log(`移除了 ${contentSignInfos.length - updatedContentSignInfos.length} 个不再有标签的rem`);
+        console.log(`Removed ${contentSignInfos.length - updatedContentSignInfos.length} rems that no longer have tags`);
         await plugin.storage.setSynced('content_sign_infos', updatedContentSignInfos);
       }
     } catch (error) {
-      console.error('检查标签状态时出错:', error);
+      console.error('Error checking tag status:', error);
     }
   };
   
-  // 设置定期检查标签状态
-  checkTagsStatusInterval = setInterval(checkTagsStatus, 5000); // 每5秒检查一次
+  // Set periodic checking of tag status
+  checkTagsStatusInterval = setInterval(checkTagsStatus, 5000);
   
-  // 在关键事件触发时也检查标签状态
+  // Set up event monitoring for automatic tagging
+  checkTagsStatus();
+  
+  // Also check tag status when key events are triggered
   plugin.event.addListener(AppEvents.RemChanged, undefined, async (data: any) => {
     await checkTagsStatus();
     
-    // 检查功能是否启用
+    // Check if the feature is enabled
     const isEnabled = await plugin.storage.getSynced('content_sign_enabled');
     if (!isEnabled) return;
 
@@ -119,29 +122,29 @@ async function onActivate(plugin: ReactRNPlugin) {
     if (!remId) return;
 
     try {
-      // 获取这个Rem的信息
+      // Get information about this Rem
       const rem = await plugin.rem.findOne(remId);
       if (!rem) return;
 
-      // 获取当前存储的content_sign信息
+      // Get currently stored content_sign information
       let contentSignInfos: ContentSignInfo[] = await plugin.storage.getSynced('content_sign_infos') || [];
       if (contentSignInfos.length === 0) return;
       
-      // 检查当前修改的Rem是否是content_sign标签的rem
+      // Check if the currently modified Rem is a content_sign tagged rem
       const isContentSignRem = contentSignInfos.some(info => info.taggedRemId === remId);
       
-      // 如果本身是content_sign标签的rem，就跳过
+      // If it is a content_sign tagged rem itself, skip
       if (isContentSignRem) return;
 
-      // 获取rem的创建时间 - 现在SDK已更新，可以直接使用createdAt属性
+      // Get rem creation time - SDK has been updated, can now use createdAt property directly
       const remCreationTime = rem.createdAt;
-      console.log('Rem创建时间 (createdAt):', remCreationTime);
-      console.log('Rem创建时间 (格式化):', new Date(remCreationTime).toISOString());
+      console.log('Rem creation time (createdAt):', remCreationTime);
+      console.log('Rem creation time (formatted):', new Date(remCreationTime).toISOString());
 
-      // 获取所有content_sign标签的ID
+      // Get all content_sign tag IDs
       const contentSignRemIds = contentSignInfos.map(info => info.taggedRemId);
       
-      // 检查是否已经有其中任一标签
+      // Check if it already has any of these tags
       let alreadyHasAnyTag = false;
       for (const tagId of contentSignRemIds) {
         const tagRems = await rem.taggedRem();
@@ -151,111 +154,111 @@ async function onActivate(plugin: ReactRNPlugin) {
         }
       }
       
-      // 如果已经有标签，跳过
+      // If already has tags, skip
       if (alreadyHasAnyTag) return;
       
-      // 只有创建时间晚于标签添加时间的rem才会被添加标签
-      // 遍历所有content_sign信息，检查时间并添加符合条件的标签
+      // Only rems created later than the tag addition time will be tagged
+      // Iterate through all content_sign information, check time and add qualifying tags
       let addedAnyTag = false;
       for (const info of contentSignInfos) {
         try {
-          // 关键逻辑：比较创建时间和标签添加时间
+          // Key logic: Compare creation time and tag addition time
           if (remCreationTime > info.timestamp) {
             const taggedRem = await plugin.rem.findOne(info.taggedRemId);
             if (taggedRem) {
-              console.log('添加标签:', info.taggedRemId, '到rem:', remId);
-              console.log('  - Rem创建时间:', new Date(remCreationTime).toISOString());
-              console.log('  - 标签添加时间:', new Date(info.timestamp).toISOString());
+              console.log('Adding tag:', info.taggedRemId, 'to rem:', remId);
+              console.log('  - Rem creation time:', new Date(remCreationTime).toISOString());
+              console.log('  - Tag addition time:', new Date(info.timestamp).toISOString());
               await rem.addTag(info.taggedRemId);
               addedAnyTag = true;
             }
           } else {
-            console.log('跳过添加标签，因为rem创建时间早于标签添加时间:');
-            console.log('  - Rem创建时间:', new Date(remCreationTime).toISOString());
-            console.log('  - 标签添加时间:', new Date(info.timestamp).toISOString());
+            console.log('Skip adding tag because rem creation time is earlier than tag addition time:');
+            console.log('  - Rem creation time:', new Date(remCreationTime).toISOString());
+            console.log('  - Tag addition time:', new Date(info.timestamp).toISOString());
           }
         } catch (tagError) {
-          console.error('添加标签时出错:', tagError);
+          console.error('Error adding tag:', tagError);
         }
       }
       
-      // 只在实际添加了标签时显示提示
+      // Only show prompts when tags are actually added
       if (addedAnyTag) {
-        await plugin.app.toast(`已自动添加标签`);
+        await plugin.app.toast(`Tags automatically added`);
       }
     } catch (error) {
-      console.error('处理Rem变更时出错:', error);
+      console.error('Error handling Rem change:', error);
     }
   });
   
-  // 专门监听新创建的Rem事件 - 使用EditorTextEdited事件可能更可靠
+  // Dedicated monitoring of newly created Rem events - using EditorTextEdited events may be more reliable
   plugin.event.addListener(AppEvents.EditorTextEdited, undefined, async () => {
-    // 先检查标签状态
+    // First check tag status
     await checkTagsStatus();
     
-    // 检查功能是否启用
+    // Check if feature is enabled
     const isEnabled = await plugin.storage.getSynced('content_sign_enabled');
     if (!isEnabled) return;
     
     try {
-      // 获取当前聚焦的rem
+      // Get currently focused rem
       const focusedRem = await plugin.focus.getFocusedRem();
       if (!focusedRem) return;
       
-      // 获取所有content_sign信息
+      // Get all content_sign information
       let contentSignInfos: ContentSignInfo[] = await plugin.storage.getSynced('content_sign_infos') || [];
       if (contentSignInfos.length === 0) return;
       
-      // 检查当前修改的Rem是否是content_sign标签的rem
+      // Check if the currently modified Rem is a content_sign tagged rem
       const isContentSignRem = contentSignInfos.some(info => info.taggedRemId === focusedRem._id);
       
-      // 如果本身是content_sign标签的rem，就跳过
+      // If it is a content_sign tagged rem itself, skip
       if (isContentSignRem) return;
       
-      // 获取rem的创建时间 - 现在SDK已更新，可以直接使用createdAt属性
+      // Get rem creation time - SDK has been updated, can now use createdAt property directly
       const remCreationTime = focusedRem.createdAt;
-      console.log('聚焦Rem创建时间 (createdAt):', remCreationTime);
-      console.log('聚焦Rem创建时间 (格式化):', new Date(remCreationTime).toISOString());
+      console.log('Focused Rem creation time (createdAt):', remCreationTime);
+      console.log('Focused Rem creation time (formatted):', new Date(remCreationTime).toISOString());
       
-      // 检查是否已经有任何content_sign标签
+      // Check if it already has any content_sign tags
       let alreadyHasAnyTag = false;
       const tagRems = await focusedRem.taggedRem();
       
-      // 只有创建时间晚于标签添加时间的rem才会被添加标签
+      // Only rems created later than the tag addition time will be tagged
       for (const info of contentSignInfos) {
         try {
-          // 检查是否已经有该标签
+          // Check if it already has this tag
           if (tagRems.some(tag => tag._id === info.taggedRemId)) {
             alreadyHasAnyTag = true;
             continue;
           }
           
-          // 关键逻辑：比较创建时间和标签添加时间
+          // Key logic: Compare creation time and tag addition time
           if (remCreationTime > info.timestamp) {
-            console.log('编辑器事件 - 添加标签:', info.taggedRemId, '到rem:', focusedRem._id);
-            console.log('  - Rem创建时间:', new Date(remCreationTime).toISOString());
-            console.log('  - 标签添加时间:', new Date(info.timestamp).toISOString());
+            console.log('Editor event - Adding tag:', info.taggedRemId, 'to rem:', focusedRem._id);
+            console.log('  - Rem creation time:', new Date(remCreationTime).toISOString());
+            console.log('  - Tag addition time:', new Date(info.timestamp).toISOString());
             await focusedRem.addTag(info.taggedRemId);
           } else {
-            console.log('编辑器事件 - 跳过添加标签，因为rem创建时间早于标签添加时间');
-            console.log('  - Rem创建时间:', new Date(remCreationTime).toISOString());
-            console.log('  - 标签添加时间:', new Date(info.timestamp).toISOString());
+            console.log('Editor event - Skip adding tag because rem creation time is earlier than tag addition time');
+            console.log('  - Rem creation time:', new Date(remCreationTime).toISOString());
+            console.log('  - Tag addition time:', new Date(info.timestamp).toISOString());
           }
         } catch (error) {
-          console.error('添加标签出错:', error);
+          console.error('Error adding tag:', error);
         }
       }
     } catch (error) {
-      console.error('处理编辑器文本编辑事件时出错:', error);
+      console.error('Error handling editor text edited event:', error);
     }
   });
 }
 
 async function onDeactivate(plugin: ReactRNPlugin) {
-  // 清理代码，取消事件监听
+  // Cleanup code, remove event listeners
   plugin.event.removeListener(AppEvents.RemChanged, undefined, () => {});
   plugin.event.removeListener(AppEvents.EditorTextEdited, undefined, () => {});
-  // 清除定时器
+  // Clear timer
   if (checkTagsStatusInterval) {
     clearInterval(checkTagsStatusInterval);
     checkTagsStatusInterval = null;

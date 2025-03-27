@@ -1,16 +1,16 @@
 import { usePlugin, renderWidget, useTracker } from '@remnote/plugin-sdk';
 import { useState, useEffect } from 'react';
 
-// 定义ContentSignInfo接口，确保类型一致性
+// Define ContentSignInfo interface to ensure type consistency
 interface ContentSignInfo {
   taggedRemId: string;
   timestamp: number;
 }
 
-// 当前版本号
-const VERSION = "v1.0.5";
+// Current version number
+const VERSION = "0.0.6";
 
-// 声明扩展的Window接口
+// Declare extended Window interface
 declare global {
   interface Window {
     _remnote_extension_helper?: any;
@@ -23,12 +23,12 @@ function ContentSignWidget() {
   const [tagCount, setTagCount] = useState(0);
   const [taggedRems, setTaggedRems] = useState<Array<{id: string, text: string}>>([]);
   
-  // 使用useTracker监听存储状态变化，这比useEffect更适合监听同步存储
+  // Use useTracker to monitor storage state changes, which is better than useEffect for monitoring sync storage
   const enabled = useTracker(async () => 
     await plugin.storage.getSynced('content_sign_enabled')
   );
   
-  // 使用useEffect监听标签数量变化和获取标记的Rem内容
+  // Use useEffect to monitor tag count changes and get tagged Rem content
   useEffect(() => {
     const fetchTaggedRems = async () => {
       const infos = await plugin.storage.getSynced('content_sign_infos') || [];
@@ -36,96 +36,96 @@ function ContentSignWidget() {
 
       setTagCount(infos.length);
       
-      // 获取每个标记的Rem的内容
+      // Get the content of each tagged Rem
       const remsData = [];
       for (let i = 0; i < Math.min(infos.length, 5); i++) {
         try {
           const rem = await plugin.rem.findOne(infos[i].taggedRemId);
           if (rem) {
-            // 获取Rem的实际文本内容
+            // Get the actual text content of Rem
             let remText = "";
             if (rem.text) {
               remText = await plugin.richText.toString(rem.text);
             }
             remsData.push({
               id: infos[i].taggedRemId,
-              text: remText || `标记的Rem #${i+1}`
+              text: remText || `Tagged Rem #${i+1}`
             });
           }
         } catch (e) {
-          // 处理可能的错误，例如Rem不存在
-          console.error("获取Rem内容时出错:", e);
+          // Handle possible errors, such as Rem not existing
+          console.error("Error getting Rem content:", e);
         }
       }
       setTaggedRems(remsData);
     };
     
-    // 立即获取一次
+    // Get it immediately once
     fetchTaggedRems();
     
-    // 设置定时器，每秒检查一次标签变化
+    // Set timer, check tag changes every second
     const intervalId = setInterval(fetchTaggedRems, 1000);
     
-    // 清理函数
+    // Cleanup function
     return () => clearInterval(intervalId);
   }, [plugin.storage, plugin.rem]);
   
-  // 当存储值变化时更新本地状态
+  // Update local state when storage value changes
   useEffect(() => {
     if (enabled !== undefined) {
       setIsEnabled(!!enabled);
     }
   }, [enabled]);
 
-  // 切换开关状态
+  // Toggle switch state
   const handleToggle = async () => {
     const newState = !isEnabled;
     setIsEnabled(newState);
     await plugin.storage.setSynced('content_sign_enabled', newState);
   };
 
-  // 处理按钮点击，跳转到对应的Rem
+  // Handle button click, jump to corresponding Rem
   const handleButtonClick = async (remId: string) => {
     try {
-      await plugin.app.toast(`正在跳转到标记的Rem...`);
+      await plugin.app.toast(`Navigating to tagged Rem...`);
       
-      // 检查Rem是否存在
+      // Check if Rem exists
       const rem = await plugin.rem.findOne(remId);
       if (!rem) {
-        await plugin.app.toast("无法找到该Rem");
+        await plugin.app.toast("Cannot find this Rem");
         return;
       }
       
-      // 使用RemNote API打开Rem
+      // Use RemNote API to open Rem
       try {
-        // 首先尝试在当前上下文中打开
+        // First try to open in current context
         await rem.openRemInContext();
-        await plugin.app.toast("已在上下文中打开Rem");
+        await plugin.app.toast("Opened Rem in context");
         return;
       } catch (inContextError) {
-        console.error("在上下文中打开失败:", inContextError);
+        console.error("Failed to open in context:", inContextError);
         
         try {
-          // 如果在上下文中打开失败，尝试作为页面打开
+          // If opening in context fails, try opening as a page
           await rem.openRemAsPage();
-          await plugin.app.toast("已作为页面打开Rem");
+          await plugin.app.toast("Opened Rem as page");
           return;
         } catch (asPageError) {
-          console.error("作为页面打开失败:", asPageError);
+          console.error("Failed to open as page:", asPageError);
           
-          // 如果两种方法都失败，给用户提供反馈
-          await plugin.app.toast("无法打开该Rem，请检查权限或稍后重试");
+          // If both methods fail, provide feedback to the user
+          await plugin.app.toast("Cannot open this Rem, please check permissions or try again later");
         }
       }
     } catch (e) {
-      console.error("处理按钮点击时出错:", e);
-      await plugin.app.toast("无法进行操作，请稍后重试");
+      console.error("Error handling button click:", e);
+      await plugin.app.toast("Cannot perform operation, please try again later");
     }
   };
 
-  // 渲染被标记的Rem按钮
+  // Render tagged Rem buttons
   const renderTaggedRemButtons = () => {
-    // 创建5个按钮槽位
+    // Create 5 button slots
     const buttons = [];
     for (let i = 0; i < 5; i++) {
       const rem = taggedRems[i];
@@ -153,16 +153,16 @@ function ContentSignWidget() {
             cursor: rem ? 'pointer' : 'default',
           }}
           disabled={!rem}
-          aria-label={rem ? `跳转到: ${rem.text}` : '空槽位'}
+          aria-label={rem ? `Jump to: ${rem.text}` : 'Empty slot'}
           tabIndex={rem ? 0 : -1}
           onKeyDown={(e) => {
             if (rem && (e.key === 'Enter' || e.key === ' ')) {
               handleButtonClick(rem.id);
             }
           }}
-          title={rem ? rem.text : '空槽位'}
+          title={rem ? rem.text : 'Empty slot'}
         >
-          {rem ? rem.text : '空槽位'}
+          {rem ? rem.text : 'Empty slot'}
         </button>
       );
     }
@@ -180,14 +180,14 @@ function ContentSignWidget() {
           backgroundClip: 'text'
         }}
       >
-        目录知识结构排序
+        AUTO TAG
       </div>
       
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">自动标记功能</span>
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Automatic Tagging</span>
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-            {isEnabled ? '已启用' : '已禁用'}
+            {isEnabled ? 'Enabled' : 'Disabled'}
           </span>
         </div>
         
@@ -203,7 +203,7 @@ function ContentSignWidget() {
             transition: 'all 0.3s ease-in-out',
             backgroundColor: isEnabled ? '#10b981' : '#d1d5db'
           }}
-          aria-label={isEnabled ? '禁用自动标记功能' : '启用自动标记功能'}
+          aria-label={isEnabled ? 'Disable automatic tagging' : 'Enable automatic tagging'}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -227,9 +227,9 @@ function ContentSignWidget() {
       </div>
       
       <div className="text-xs text-gray-600 dark:text-gray-400 mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
-        <p>当启用时，新创建的Rem将自动被标记。</p>
-        <p>当前共有 <span className="font-bold">{tagCount}</span> 个活动标签。</p>
-        <p className="text-xs text-gray-500 mt-1">测试版本 {VERSION}</p>
+        <p>When enabled, newly created Rems will be automatically tagged.</p>
+        <p>Currently there are <span className="font-bold">{tagCount}</span> active tags.</p>
+        <p className="text-xs text-gray-500 mt-1">Version {VERSION}</p>
       </div>
 
       <div className="mt-2">
