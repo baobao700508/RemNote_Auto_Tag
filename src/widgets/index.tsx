@@ -89,7 +89,7 @@ async function onActivate(plugin: ReactRNPlugin) {
   // Register widget in bottom left sidebar
   await plugin.app.registerWidget('content_sign_widget', WidgetLocation.LeftSidebar, {
     dimensions: { height: 'auto', width: '100%' },
-    widgetTabIcon: 'https://cdn-icons-png.flaticon.com/512/3406/3406894.png',
+    widgetTabIcon: 'https://cdn-icons-png.flaticon.com/512/1864/1864514.png',
     widgetTabTitle: 'AUTO TAG'
   });
 
