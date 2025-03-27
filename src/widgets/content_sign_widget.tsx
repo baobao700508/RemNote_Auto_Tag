@@ -93,103 +93,26 @@ function ContentSignWidget() {
         return;
       }
       
-      // 使用适合开发环境和生产环境的方法打开Rem
+      // 使用RemNote API打开Rem
       try {
-        // 判断环境类型
-        const isDevelopment = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1';
+        // 首先尝试在当前上下文中打开
+        await rem.openRemInContext();
+        await plugin.app.toast("已在上下文中打开Rem");
+        return;
+      } catch (inContextError) {
+        console.error("在上下文中打开失败:", inContextError);
         
-        // 在开发环境中，不尝试直接导航，而是显示提示
-        if (isDevelopment) {
-          console.log("开发环境下，无法直接导航到Rem。Rem ID:", remId);
-          await plugin.app.toast(`开发环境下无法导航。Rem ID: ${remId}`);
-          
-          // 显示一个更详细的提示，帮助开发者理解
-          console.info("在开发环境中，由于运行在本地服务器，无法直接导航到RemNote的Rem。" +
-                      "这个功能需要在实际的RemNote环境中才能正常工作。");
+        try {
+          // 如果在上下文中打开失败，尝试作为页面打开
+          await rem.openRemAsPage();
+          await plugin.app.toast("已作为页面打开Rem");
           return;
-        }
-        
-        // 生产环境下，尝试各种方法打开Rem
-        
-        // 方法1: 首先尝试使用内置的文档打开方法
-        try {
-          // @ts-ignore
-          if (typeof plugin.app.openDocument === 'function') {
-            // @ts-ignore
-            await plugin.app.openDocument(remId);
-            await plugin.app.toast("正在打开文档...");
-            return;
-          }
-        } catch (err) {
-          console.error("使用app.openDocument方法失败:", err);
-        }
-
-        // 方法2: 尝试使用RemNote扩展助手
-        if (window._remnote_extension_helper) {
-          try {
-            window._remnote_extension_helper.openRemById(remId);
-            await plugin.app.toast("正在通过扩展跳转...");
-            return;
-          } catch (extensionError) {
-            console.error("使用扩展跳转出错:", extensionError);
-          }
-        }
-        
-        // 方法3: 尝试使用window API
-        try {
-          // @ts-ignore
-          if (typeof plugin.window.navigateToRem === 'function') {
-            // @ts-ignore
-            await plugin.window.navigateToRem(remId);
-            await plugin.app.toast("正在导航到Rem...");
-            return;
-          }
-        } catch (navError) {
-          console.error("使用navigateToRem方法失败:", navError);
-        }
-        
-        // 方法4: 使用URL方式打开，确保处理好框架环境
-        try {
-          // 获取当前URL信息
-          const currentUrl = new URL(window.location.href);
-          let baseUrl;
+        } catch (asPageError) {
+          console.error("作为页面打开失败:", asPageError);
           
-          // 针对不同的RemNote部署环境调整基础URL
-          if (currentUrl.hostname.includes('remnote.com')) {
-            // 官方RemNote网站
-            baseUrl = 'https://www.remnote.com';
-          } else if (currentUrl.hostname.includes('remnote.io')) {
-            // 旧版域名
-            baseUrl = 'https://www.remnote.io';
-          } else {
-            // 自定义部署或本地部署，使用当前域名
-            baseUrl = `${currentUrl.protocol}//${currentUrl.host}`;
-          }
-          
-          // 构建完整URL
-          const completeUrl = `${baseUrl}/document/${remId}`;
-          
-          // 使用top引用确保在顶层窗口打开而不是在iframe中
-          if (window.top) {
-            window.top.location.href = completeUrl;
-          } else {
-            window.location.href = completeUrl;
-          }
-          
-          await plugin.app.toast("正在跳转到文档...");
-          return;
-        } catch (urlError) {
-          console.error("使用URL导航方法失败:", urlError);
+          // 如果两种方法都失败，给用户提供反馈
+          await plugin.app.toast("无法打开该Rem，请检查权限或稍后重试");
         }
-        
-        // 如果以上方法都失败，尝试一个最后的方法 - 打开一个新标签页
-        window.open(`https://www.remnote.com/document/${remId}`, '_blank');
-        await plugin.app.toast("已在新标签页打开");
-        
-      } catch (error) {
-        console.error("跳转时出错:", error);
-        await plugin.app.toast("无法跳转到该Rem，请手动查找");
       }
     } catch (e) {
       console.error("处理按钮点击时出错:", e);
