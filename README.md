@@ -1,6 +1,5 @@
-# (RemNote Auto Tag)
-# (RemNote Auto Tag)
 
+# (RemNote Auto Tag)
 > **⚠️ 开发声明：** 本插件目前处于测试阶段，可能存在不稳定或未预期的行为。我们欢迎用户反馈，并将持续改进插件功能和稳定性。开发者是一个只学过美国一年制CS高中课程的高中生(中国留学生), 该项目主要使用cursor辅助开发. 这是我使用cursor编程的第三个尝试项目.
 > **⚠️ Development Notice:** This plugin is currently in the testing phase and may have unstable or unexpected behaviors. We welcome user feedback and will continuously improve the plugin's functionality and stability. The developer is a high school student (Chinese international student) who has only completed a one-year American high school CS course. This project was primarily developed with the assistance of Cursor. This is my third programming attempt using Cursor.
 
@@ -18,9 +17,6 @@
 
 - ✅ **自动标记系统**：使用"Content Structure Sign"(内容结构标记) PowerUp自动为新创建的内容添加标签
 - ✅ **Automatic Tagging System**: Uses the "Content Structure Sign" PowerUp to automatically add tags to newly created content
-
-- ✅ **时间戳追踪**：记录标签添加的时间，并根据创建时间自动为新内容添加相关标记
-- ✅ **Timestamp Tracking**: Records the time when tags are added and automatically adds relevant tags to new content based on creation time
 
 - ✅ **简洁界面**：直观的侧边栏控制面板，轻松开启/关闭自动标记功能
 - ✅ **Clean Interface**: Intuitive sidebar control panel to easily enable/disable the automatic tagging function
